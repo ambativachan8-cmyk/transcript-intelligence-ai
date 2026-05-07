@@ -1,0 +1,5 @@
+stakeholder,primary_question,top_relevant_theme,relevant_transcripts,negative_transcripts,recommended_action
+Support leader,Where are customers getting stuck and which issues need escalation?,Product bugs and technical reliability,67,22,Create a weekly negative-theme and escalation-risk review.
+Product manager,What are customers asking for and which pain points should shape roadmap priority?,Compliance and audit readiness,32,0,Validate top requests with PM taxonomy and attach examples to roadmap candidates.
+Sales / account manager,Which accounts show renewal risk or expansion opportunity?,"Renewal, pricing, and account risk",44,4,Trigger proactive account plays for high-risk renewal conversations.
+Engineering lead,Which technical problems recur and how do they map to internal execution?,Product bugs and technical reliability,56,21,Tie incident and bug clusters to reliability roadmap ownership.

@@ -1,0 +1,1 @@
+Raw transcript JSON folders copied from the provided assignment dataset. Each transcript folder contains transcript.json, summary.json, meeting-info.json, speakers.json, speaker-meta.json, and events.json.

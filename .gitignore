@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+__MACOSX/
+.ipynb_checkpoints/
+.env
+*.log
+site-packages/
+zip_verification_temp/

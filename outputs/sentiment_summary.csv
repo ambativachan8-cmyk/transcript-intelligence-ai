@@ -1,0 +1,4 @@
+call_type,transcripts,avg_sentiment_score,negative_transcripts,neutral_transcripts,positive_transcripts,avg_word_count,interpretation
+external,35,0.48,3,7,25,1571.486,"External sentiment is a leading indicator for renewal confidence, adoption, and expansion potential."
+internal,15,0.32,1,7,7,1242.867,"Internal sentiment shows team confidence and urgency around execution, incidents, and launch work."
+support,50,0.021,19,13,18,1354.24,Support sentiment reflects immediate product friction and should feed issue triage.
