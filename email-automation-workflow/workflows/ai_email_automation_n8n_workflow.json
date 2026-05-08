@@ -1,0 +1,981 @@
+{
+  "name": "AI Email Automation Workflow - Sanitized Portfolio Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "SANITIZED_ID",
+      "name": "New Email Received",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        240,
+        720
+      ],
+      "credentials": {
+        "imap": {
+          "id": "YOUR_IMAP_CREDENTIAL_ID",
+          "name": "YOUR_IMAP_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;const from = (item.from || '').toLowerCase();const subject = (item.subject || '').toLowerCase();const headers = JSON.stringify(item.headers || {}).toLowerCase();const messageId = item.messageId || item.id || (item.from + '|' + item.subject);const autoReplyP = ['out of office','auto-reply','automatic reply','delivery failure','undeliverable','mailer-daemon','failed delivery','returned mail','vacation notice'];const spamP = ['unsubscribe','you are receiving this','limited time offer'];const noReplyP = ['no-reply@','noreply@','donotreply@','mailer-daemon@','postmaster@','bounce@'];const isFiltered = autoReplyP.some(p => subject.includes(p)) || spamP.some(p => subject.includes(p)) || noReplyP.some(p => from.includes(p)) || headers.includes('auto-submitted');const filterReason = autoReplyP.some(p => subject.includes(p)) ? 'Auto-reply or bounce' : spamP.some(p => subject.includes(p)) ? 'Newsletter' : noReplyP.some(p => from.includes(p)) ? 'No-reply sender' : 'Auto-submitted header';return [{ json: { ...item, _filtered: isFiltered, _filterReason: isFiltered ? filterReason : '', _messageId: messageId } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Pre-Filter Spam",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SANITIZED_ID",
+              "leftValue": "={{ $json._filtered }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "rightValue": false
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "SANITIZED_ID",
+      "name": "Is Valid Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;const messageId = item._messageId || item.messageId || item.id || '';const sd = $getWorkflowStaticData('global');if (!sd.processedIds) sd.processedIds = [];if (sd.processedIds.length > 1000) sd.processedIds = sd.processedIds.slice(-1000);const isDuplicate = messageId ? sd.processedIds.includes(messageId) : false;if (!isDuplicate && messageId) sd.processedIds.push(messageId);return [{ json: { ...item, _isDuplicate: isDuplicate } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Deduplicate Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Filtered Out - No Action",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        816
+      ],
+      "webhookId": "b3e692ad-4938-41e0-bc1c-0b48b3b498ac",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SANITIZED_ID",
+              "leftValue": "={{ $json._isDuplicate }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "rightValue": false
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "SANITIZED_ID",
+      "name": "Already Processed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;const from = item.from || 'Unknown';const subject = item.subject || '(No Subject)';const body = (item.textPlain || item.text || '').substring(0, 4000);const sp = 'You are AI Email Manager for YOUR_COMPANY_NAME, India exporter of biodegradable tableware (bamboo, areca palm leaf, sugarcane bagasse). ' +'Certs: FDA, LFGB, EU food-safe. MOQ ~5000 pcs. Lead time 15-30 days. FOB/CIF. Custom branding. Markets: USA, UK, EU, AU, ME, SEA, CA. ' +'Classify as LEAD/INQUIRY/ORDER/COMPLAINT/SPAM/INTERNAL/OTHER. Priority HIGH/MEDIUM/LOW. requires_reply true for LEAD/INQUIRY/ORDER/COMPLAINT, false for SPAM/INTERNAL/auto. ' +'Tone: professional warm export-sales. Sign: Export Sales Team | YOUR_COMPANY_NAME | YOUR_EMAIL_ADDRESS. ' +'Return ONLY raw JSON: {\"classification\":\"...\",\"priority\":\"...\",\"requires_reply\":true,\"reasoning\":\"...\",\"email_draft\":\"...\"}';const um = 'From: ' + from + '\\nSubject: ' + subject + '\\n\\nBody:\\n' + body;return [{ json: { from, subject, body, systemPrompt: sp, userMessage: um } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Prepare OpenAI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "content": "={{ $json.userMessage }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.4
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Call OpenAI API",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        624
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAIAPI_CREDENTIAL_ID",
+          "name": "YOUR_OPENAIAPI_CREDENTIAL"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Alert OpenAI API Error",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1936,
+        720
+      ],
+      "webhookId": "279300ef-6819-47ba-9d87-4c46ba431a4a",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json.output || '';const prev = $('Prepare OpenAI Prompt').item.json;let p;try { let c = raw.replace(new RegExp('\\\\x60\\\\x60\\\\x60json\\\\s*','gi'),'').replace(new RegExp('\\\\x60\\\\x60\\\\x60\\\\s*','gi'),'').trim(); const m = c.match(/{[\\s\\S]*}/); p = JSON.parse(m ? m[0] : c); }catch(e) { p = { classification:'UNKNOWN', priority:'MEDIUM', requires_reply:true, reasoning:'Parse failed', email_draft:'MANUAL REVIEW\\n' + (prev.body||'') }; }const cl = String(p.classification||'OTHER').toUpperCase();const pr = String(p.priority||'MEDIUM').toUpperCase();const rr = p.requires_reply === true || String(p.requires_reply).toLowerCase() === 'true';const pL = {HIGH:'HIGH PRIORITY',MEDIUM:'MEDIUM PRIORITY',LOW:'LOW PRIORITY'}[pr]||'UNKNOWN';const cL = {LEAD:'[LEAD]',INQUIRY:'[INQUIRY]',ORDER:'[ORDER]',COMPLAINT:'[COMPLAINT]',SPAM:'[SPAM]',INTERNAL:'[INTERNAL]',OTHER:'[OTHER]',UNKNOWN:'[UNKNOWN]'}[cl]||'[OTHER]';return [{ json: { from:prev.from, subject:prev.subject, body:prev.body, classification:cl, priority:pr, requires_reply:rr, reasoning:p.reasoning||'N/A', email_draft:p.email_draft||'', priorityLabel:pL, classLabel:cL } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Parse OpenAI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.requires_reply }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "rightValue": true
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "SANITIZED_ID",
+      "name": "Requires Reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2208,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "YOUR_REVIEW_CHAT_ID",
+        "message": "=NEW EMAIL\n{{ $json.priorityLabel }} | {{ $json.classLabel }}\nFrom: {{ $json.from }}\nSubject: {{ $json.subject }}\nReason: {{ $json.reasoning }}\n\n--- DRAFT ---\n{{ $json.email_draft }}\n-------------\n\nYES / EDIT [notes] / NO",
+        "responseType": "freeText",
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 24
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Request Approval",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2592,
+        704
+      ],
+      "webhookId": "adb64a17-0a71-452a-9b76-fc2ce3240667",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Log No Reply Needed",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2592,
+        896
+      ],
+      "webhookId": "04892066-8082-4ebf-9879-e7420285072f",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SANITIZED_ID",
+              "leftValue": "={{ ($json.data?.text || '').trim().toUpperCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "YES"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Response is YES?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "YOUR_EMAIL_ADDRESS",
+        "toEmail": "={{ $('Parse OpenAI Response').item.json.from }}",
+        "subject": "={{ $('Parse OpenAI Response').item.json.subject.startsWith('Re:') ? $('Parse OpenAI Response').item.json.subject : 'Re: ' + $('Parse OpenAI Response').item.json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('Parse OpenAI Response').item.json.email_draft }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Send Initial Reply",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3008,
+        448
+      ],
+      "webhookId": "f8a0882a-4111-482f-ab46-0b1d39c8955a",
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "YOUR_SMTP_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Confirm Email Sent",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3232,
+        448
+      ],
+      "webhookId": "7e9853e9-eaa9-4c60-abb3-6788d3728970",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SANITIZED_ID",
+              "leftValue": "={{ ($json.data?.text || '').trim().toUpperCase().substring(0, 4) }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "EDIT"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Response is EDIT?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3040,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const tr = $input.item.json.data?.text || '';const prev = $('Parse OpenAI Response').item.json;const editNotes = tr.replace(/^EDIT\\s*/i, '').trim() || 'Please improve the draft.';const sp = 'You are AI Email Manager for YOUR_COMPANY_NAME. Rewrite the email draft incorporating the manager revision notes. Return ONLY raw JSON: {\"email_draft\":\"revised email\"}';const um = 'From: ' + prev.from + '\\nSubject: ' + prev.subject + '\\n\\nPrev draft:\\n' + prev.email_draft + '\\n\\nNOTES:\\n' + editNotes;return [{ json: { from:prev.from, subject:prev.subject, body:prev.body, priorityLabel:prev.priorityLabel, classLabel:prev.classLabel, original_draft:prev.email_draft, editNotes, systemPrompt:sp, userMessage:um } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Extract Edit Notes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3264,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Notify Email Discarded",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3264,
+        896
+      ],
+      "webhookId": "69e30c28-2b5b-41c4-a160-84ff0389074b",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "content": "={{ $json.userMessage }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.4
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Regenerate with OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        3488,
+        704
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAIAPI_CREDENTIAL_ID",
+          "name": "YOUR_OPENAIAPI_CREDENTIAL"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Alert Regen Error",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3840,
+        800
+      ],
+      "webhookId": "43595f8c-d055-4ad2-a40b-af53e452eaec",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json.output || '';const prev = $('Extract Edit Notes').item.json;let p;try { let c = raw.replace(new RegExp('\\\\x60\\\\x60\\\\x60json\\\\s*','gi'),'').replace(new RegExp('\\\\x60\\\\x60\\\\x60\\\\s*','gi'),'').trim(); const m = c.match(/{[\\s\\S]*}/); p = JSON.parse(m ? m[0] : c); }catch(e) { p = { email_draft: raw.length > 20 ? raw : prev.original_draft }; }const rd = (p.email_draft||'').trim() || raw || prev.original_draft;return [{ json: { from:prev.from, subject:prev.subject, priorityLabel:prev.priorityLabel, classLabel:prev.classLabel, editNotes:prev.editNotes, revised_draft:rd } }];"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Parse Revised Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3840,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "YOUR_REVIEW_CHAT_ID",
+        "message": "=REVISED DRAFT\n{{ $json.priorityLabel }} | {{ $json.classLabel }}\nTo: {{ $json.from }} | Re: {{ $json.subject }}\nNotes: {{ $json.editNotes }}\n\n--- REVISED ---\n{{ $json.revised_draft }}\n---------------\n\nYES to send / NO to discard",
+        "responseType": "freeText",
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 24
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Approve Revised Draft",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4064,
+        608
+      ],
+      "webhookId": "659310f3-2300-454f-afd8-a2ce009f9b72",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "SANITIZED_ID",
+              "leftValue": "={{ ($json.data?.text || '').trim().toUpperCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "YES"
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Revised Reply Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4256,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "YOUR_EMAIL_ADDRESS",
+        "toEmail": "={{ $('Parse Revised Response').item.json.from }}",
+        "subject": "={{ $('Parse Revised Response').item.json.subject.startsWith('Re:') ? $('Parse Revised Response').item.json.subject : 'Re: ' + $('Parse Revised Response').item.json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('Parse Revised Response').item.json.revised_draft }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Send Revised Reply",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        4480,
+        448
+      ],
+      "webhookId": "f5a49346-247f-4937-851f-66aaa1c8c006",
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "YOUR_SMTP_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Confirm Revised Sent",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4704,
+        448
+      ],
+      "webhookId": "5531bf54-8806-4c0b-bdee-d0641f844858",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "YOUR_REVIEW_CHAT_ID"
+      },
+      "id": "SANITIZED_ID",
+      "name": "Revised Draft Discarded",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4480,
+        640
+      ],
+      "webhookId": "f235c6f8-2cff-46ee-ac32-06c168285229",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAMAPI_CREDENTIAL_ID",
+          "name": "YOUR_TELEGRAMAPI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "content": "={{ $json.userMessage }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.4
+        }
+      },
+      "id": "SANITIZED_ID",
+      "name": "Call OpenAI API1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        960
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAIAPI_CREDENTIAL_ID",
+          "name": "YOUR_OPENAIAPI_CREDENTIAL"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Email Received": {
+      "main": [
+        [
+          {
+            "node": "Pre-Filter Spam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre-Filter Spam": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Email?": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate Check",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filtered Out - No Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate Check": {
+      "main": [
+        [
+          {
+            "node": "Already Processed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Processed?": {
+      "main": [
+        [
+          {
+            "node": "Prepare OpenAI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare OpenAI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call OpenAI API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenAI API": {
+      "main": [
+        [
+          {
+            "node": "Parse OpenAI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Alert OpenAI API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse OpenAI Response": {
+      "main": [
+        [
+          {
+            "node": "Requires Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requires Reply?": {
+      "main": [
+        [
+          {
+            "node": "Request Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log No Reply Needed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Approval": {
+      "main": [
+        [
+          {
+            "node": "Response is YES?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response is YES?": {
+      "main": [
+        [
+          {
+            "node": "Send Initial Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response is EDIT?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Initial Reply": {
+      "main": [
+        [
+          {
+            "node": "Confirm Email Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response is EDIT?": {
+      "main": [
+        [
+          {
+            "node": "Extract Edit Notes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Email Discarded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Edit Notes": {
+      "main": [
+        [
+          {
+            "node": "Regenerate with OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Regenerate with OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Parse Revised Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Alert Regen Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Revised Response": {
+      "main": [
+        [
+          {
+            "node": "Approve Revised Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approve Revised Draft": {
+      "main": [
+        [
+          {
+            "node": "Revised Reply Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revised Reply Approved?": {
+      "main": [
+        [
+          {
+            "node": "Send Revised Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Revised Draft Discarded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Revised Reply": {
+      "main": [
+        [
+          {
+            "node": "Confirm Revised Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "SANITIZED_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "note": "Sanitized public portfolio export. Configure credentials inside n8n before use."
+  },
+  "id": "SANITIZED_WORKFLOW_ID",
+  "tags": []
+}

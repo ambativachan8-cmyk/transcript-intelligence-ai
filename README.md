@@ -99,3 +99,7 @@ The default input path is `data/raw/dataset`, copied from the provided assignmen
 - Add CRM/support integrations for account ownership and renewal date context.
 - Implement alerting for high-risk escalation/churn transcripts.
 - Add human feedback loops to tune taxonomy, sentiment thresholds, and routing ownership.
+
+## Additional Module: AI Email Automation Workflow
+
+This repository also includes an `email-automation-workflow/` module documenting an AI-assisted email workflow for recruiter replies, interview follow-ups, assignment submissions, status-check emails, and professional email drafting. The workflow is designed with human review before sending and keeps credentials/secrets out of the repository.

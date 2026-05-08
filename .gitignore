@@ -7,6 +7,14 @@ __pycache__/
 __MACOSX/
 .ipynb_checkpoints/
 .env
+*.env
+credentials.json
+token.json
+client_secret.json
+*.secret
+secrets/
+.oauth/
+.n8n/
 *.log
 site-packages/
 zip_verification_temp/
