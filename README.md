@@ -6,6 +6,8 @@
 
 Transcript Intelligence AI turns messy call transcripts into product, support, sentiment, churn/risk, and leadership insights. It is part of my broader AI systems portfolio, alongside **AI News Intel**, an agentic RAG/document intelligence system that converts source material into evidence-backed answers and decision-ready summaries.
 
+This project was completed as a practical technical assignment/prototype and is presented here as a portfolio example of transcript analytics and business intelligence pipeline design.
+
 This public repository keeps the code and documentation visible while excluding raw transcript datasets, private records, credentials, and row-level generated outputs.
 
 ## Objective
