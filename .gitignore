@@ -18,3 +18,9 @@ secrets/
 *.log
 site-packages/
 zip_verification_temp/
+data/raw/dataset/
+data/processed/
+outputs/
+deck/
+presentation/
+notebooks/

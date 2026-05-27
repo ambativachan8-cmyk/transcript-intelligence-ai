@@ -1,11 +1,12 @@
-# Transcript Intelligence
+# Transcript Intelligence AI
 
 **Portfolio:** [vachanambati.com](https://vachanambati.com)  
-**Featured AI Systems:** [AI News Intel and document intelligence portfolio](https://vachanambati.com/ai-systems)
+**AI Systems:** [vachanambati.com/ai-systems](https://vachanambati.com/ai-systems)  
+**Role:** Python pipeline for transcript intelligence, business signal extraction, and leadership-ready summaries.
 
-This project is part of my public AI systems portfolio. My broader work includes **AI News Intel**, an agentic RAG intelligence system that converts messy source material into evidence-backed answers, structured summaries, and decision-ready insights. The live portfolio explains the system positioning without exposing private code, credentials, datasets, or security-sensitive infrastructure details.
+Transcript Intelligence AI turns messy call transcripts into product, support, sentiment, churn/risk, and leadership insights. It is part of my broader AI systems portfolio, alongside **AI News Intel**, an agentic RAG/document intelligence system that converts source material into evidence-backed answers and decision-ready summaries.
 
-This project is a take-home prototype for a B2B Enterprise SaaS product called **Transcript Intelligence**. It turns raw call transcripts into product, support, account, and engineering insights.
+This public repository keeps the code and documentation visible while excluding raw transcript datasets, private records, credentials, and row-level generated outputs.
 
 ## Objective
 
@@ -23,13 +24,18 @@ Transcript Intelligence follows the same practical pattern behind my broader doc
 
 The same pattern can be applied to scanned reports, policy notes, trade documents, meeting transcripts, operational records, internal files, financial records, and intelligence dashboards.
 
-## Key Findings
+## Example Analysis Scope
 
-- Processed **100 transcripts**: 50 support, 35 external/customer, and 15 internal calls.
-- Identified **6 major themes**. The largest theme was **Product bugs and technical reliability** with **44 transcripts**.
-- Support calls carried the clearest risk signal: **19 of 50 support transcripts** were negative, concentrated around technical reliability, outage, SLA, and escalation language.
-- External calls were more positive overall, but renewal/pricing conversations still surfaced trust, outage, and competitive risk signals.
-- Additional insight layers identify escalation risk, feature requests, churn/renewal risk, stakeholder-specific views, and product-engineering alignment gaps.
+The original assignment run analyzed a transcript dataset and produced:
+
+- support, external/customer, and internal call segmentation,
+- business-theme classification,
+- sentiment summaries,
+- escalation and churn-risk signals,
+- feature-request extraction,
+- stakeholder views for product, support, engineering, and leadership.
+
+Raw source transcripts and row-level outputs are intentionally not published in this repo.
 
 ## Folder Structure
 
@@ -39,11 +45,10 @@ transcript-intelligence/
   requirements.txt
   run_pipeline.py
   build_submission_assets.py
-  data/
-    raw/dataset/
-    processed/
+  data/raw/
+    README.md
   notebooks/
-    01_transcript_intelligence_analysis.ipynb
+    excluded from public repo
   src/
     load_data.py
     preprocess.py
@@ -52,14 +57,9 @@ transcript-intelligence/
     insights.py
     visualization.py
   outputs/
-    processed_transcripts.csv
-    topic_summary.csv
-    sentiment_summary.csv
-    additional_insights.csv
-    charts/
-    slide_assets/
+    generated locally; excluded from public repo
   deck/
-    Transcript_Intelligence_Presentation.pptx
+    generated locally; excluded from public repo
   demo_script.md
 ```
 
@@ -77,7 +77,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe build_submission_assets.py
 ```
 
-The default input path is `data/raw/dataset`, copied from the provided assignment folder. You can also pass a different raw folder:
+The default input path is `data/raw/dataset`. This public repository does not include the original raw transcript dataset. To run the pipeline, add your own authorized transcript export locally or pass a different raw folder:
 
 ```powershell
 .\.venv\Scripts\python.exe run_pipeline.py --raw-dir "path\to\dataset"
@@ -94,13 +94,23 @@ The default input path is `data/raw/dataset`, copied from the provided assignmen
 
 ## Outputs
 
+Generated locally:
+
 - `outputs/processed_transcripts.csv`: normalized transcript-level dataset.
 - `outputs/topic_summary.csv`: theme names, counts, call type distribution, keywords, examples, and business importance.
 - `outputs/sentiment_summary.csv`: sentiment by call type with interpretation.
 - `outputs/additional_insights.csv`: combined additional insight output.
 - `outputs/charts/*.png`: reusable chart assets for deck and demo.
-- `deck/Transcript_Intelligence_Presentation.pptx`: 20-slide leadership presentation.
-- `notebooks/01_transcript_intelligence_analysis.ipynb`: readable analysis notebook.
+- `deck/Transcript_Intelligence_Presentation.pptx`: leadership presentation.
+
+These files are excluded from the public repo because they can contain source-derived details.
+
+## Privacy And Safety
+
+- No API keys, tokens, `.env` files, private datasets, credentials, or production infrastructure details are published.
+- Raw transcripts and row-level output files are excluded from GitHub.
+- Use only authorized, non-sensitive data when running the pipeline.
+- If sensitive data was ever committed to a public branch, deleting the latest files is not enough; Git history cleanup and credential rotation may still be required.
 
 ## Limitations
 
