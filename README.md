@@ -1,10 +1,27 @@
 # Transcript Intelligence
 
+**Portfolio:** [vachanambati.com](https://vachanambati.com)  
+**Featured AI Systems:** [AI News Intel and document intelligence portfolio](https://vachanambati.com/ai-systems)
+
+This project is part of my public AI systems portfolio. My broader work includes **AI News Intel**, an agentic RAG intelligence system that converts messy source material into evidence-backed answers, structured summaries, and decision-ready insights. The live portfolio explains the system positioning without exposing private code, credentials, datasets, or security-sensitive infrastructure details.
+
 This project is a take-home prototype for a B2B Enterprise SaaS product called **Transcript Intelligence**. It turns raw call transcripts into product, support, account, and engineering insights.
 
 ## Objective
 
 Build an end-to-end pipeline that ingests transcript folders, normalizes the data, categorizes transcripts by business theme, scores sentiment, extracts additional insights, and packages the findings for a 30-minute leadership presentation.
+
+## Why This Connects To My AI Systems Work
+
+Transcript Intelligence follows the same practical pattern behind my broader document-intelligence work:
+
+- ingest messy source material,
+- normalize it into usable records,
+- retrieve and classify the most important signals,
+- generate structured insights for business users,
+- keep outputs explainable and reviewable.
+
+The same pattern can be applied to scanned reports, policy notes, trade documents, meeting transcripts, operational records, internal files, financial records, and intelligence dashboards.
 
 ## Key Findings
 
@@ -99,3 +116,7 @@ The default input path is `data/raw/dataset`, copied from the provided assignmen
 - Add CRM/support integrations for account ownership and renewal date context.
 - Implement alerting for high-risk escalation/churn transcripts.
 - Add human feedback loops to tune taxonomy, sentiment thresholds, and routing ownership.
+
+## More From My Portfolio
+
+See the full AI systems portfolio at [vachanambati.com](https://vachanambati.com), including my AI News Intel case study and live portfolio experience.
